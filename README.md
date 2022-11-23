@@ -1,40 +1,18 @@
 # Deno Orm sqLite
 
-An sqlite orm for Deno.
+An sqlite orm library on Deno for my personal projects. Depends on [sqlite@v3.7.0](https://deno.land/x/sqlite@v3.7.0).
 
 # Usage
-```typescript
-import { Database } from '';
 
-await Database.init(
-  [
-    class User extends Model {
-      static table: Table = {
-        name: "users",
-        rows: [
-          "id SERIAL PRIMARY KEY",
-          "name TEXT NOT NULL",
-          "email TEXT NOT NULL",
-          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-          "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-        ],
-      } as Table;
+## Import
 
-      name: string;
-      email: string;
+```ts
+import { Database } from "https://deno.land/x/dormlite/mod.ts";
+```
 
-      constructor(
-        id: number,
-        createdAt: string,
-        updatedAt: string,
-        name: string,
-        email: string,
-      ) {
-        super(id, createdAt, updatedAt);
-        this.name = name;
-        this.email = email;
-      }
-    },
-  ],
-);
+## Basic usage
+
+Basic usage is covered on [the tests](./mod.test.ts). You can run them with 
+```bash
+deno test --allow-read --allow-write
 ```
