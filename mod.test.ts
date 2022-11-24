@@ -1,19 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.165.0/testing/asserts.ts";
 
-import { Database, Model, Table } from "./mod.ts";
+import { Database, Model } from "./mod.ts";
 
 class Dinosaur extends Model {
-  static table = {
-    name: "dinosaurs",
-    autoincrement: 0,
-    rows: [
-      "id SERIAL PRIMARY KEY",
-      "name TEXT NOT NULL",
-      "coolness INT NOT NULL",
-      "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-      "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-    ],
-  };
+  static tableName = "dinosaurs";
 
   name: string;
   coolness: number;
@@ -29,17 +19,7 @@ class Dinosaur extends Model {
 }
 
 class User extends Model {
-  static table = {
-    name: "users",
-    autoincrement: 0,
-    rows: [
-      "id SERIAL PRIMARY KEY",
-      "name TEXT NOT NULL",
-      "email TEXT NOT NULL",
-      "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-      "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-    ],
-  };
+  static tableName = "users";
 
   name: string;
   email: string;

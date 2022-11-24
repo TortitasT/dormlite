@@ -11,22 +11,15 @@ export class Database {
 
     if (!databaseExists) {
       await models.forEach(async (model) => {
-        await model.init();
+        await model.init(model);
       });
     }
   }
 }
 
 export class Model {
-  static table: any = {
-    name: "model",
-    autoincrement: 0,
-    rows: [
-      "id SERIAL PRIMARY KEY",
-      "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-      "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-    ],
-  };
+  static autoincrement = 0;
+  static tableName = "models";
 
   id: number;
   created_at: string;
@@ -38,11 +31,40 @@ export class Model {
     this.updated_at = new Date().toISOString();
   }
 
-  static async init() {
+  static async init<T extends Model>(model: new () => T) {
+    const temp: any = new model();
+
+    const columns = Object.keys(temp).map((column) => {
+      if (column === "id") {
+        return `${column} SERIAL PRIMARY KEY`;
+      } else if (column === "tableName") {
+        return false;
+      }
+
+      const type = typeof temp[column];
+      let sqlType = "";
+
+      switch (type) {
+        case "string":
+          sqlType = "TEXT";
+          break;
+        case "number":
+          sqlType = "INT";
+          break;
+        case "boolean":
+          sqlType = "BOOLEAN";
+          break;
+        default:
+          sqlType = "TEXT";
+      }
+
+      return `${column} ${sqlType}`;
+    }).filter(Boolean);
+
     await Database.db.query(
       `
-      CREATE TABLE IF NOT EXISTS ${this.table.name} (
-        ${this.table.rows.join(", ")}
+      CREATE TABLE IF NOT EXISTS ${this.tableName} (
+        ${columns.join(", ")}
       )
       `,
     );
@@ -50,7 +72,7 @@ export class Model {
 
   static async all(): Promise<Model[]> {
     const results = await Database.db.query(
-      `SELECT * FROM ${this.table.name}`,
+      `SELECT * FROM ${this.tableName}`,
     );
 
     return results as unknown[] as Model[];
@@ -58,7 +80,7 @@ export class Model {
 
   static async find(id: number): Promise<Model> {
     const results = await Database.db.query(
-      `SELECT * FROM ${this.table.name} WHERE id = $1`,
+      `SELECT * FROM ${this.tableName} WHERE id = $1`,
       [id],
     );
 
@@ -70,7 +92,7 @@ export class Model {
     value: string | number,
   ): Promise<Model[]> {
     const results = await Database.db.query(
-      `SELECT * FROM ${this.table.name} WHERE ${column} = $1`,
+      `SELECT * FROM ${this.tableName} WHERE ${column} = $1`,
       [value],
     );
 
@@ -83,8 +105,14 @@ export class Model {
     const columns = Object.keys(model);
     const values = Object.values(model);
 
+    const indexOfTableName = columns.indexOf("tableName");
+    if (indexOfTableName! > -1) {
+      columns.splice(indexOfTableName, 1);
+      values.splice(indexOfTableName, 1);
+    }
+
     const result = await Database.db.query(
-      `INSERT INTO ${this.table.name} (${columns.join(", ")}) VALUES (${
+      `INSERT INTO ${this.tableName} (${columns.join(", ")}) VALUES (${
         values.map((_, i) => `$${i + 1}`).join(", ")
       }) RETURNING *`,
       values,
@@ -94,17 +122,12 @@ export class Model {
   }
 }
 
-export interface Table {
-  name: string;
-  rows: string[];
-}
-
 // Source: https://stackoverflow.com/questions/33387318/access-to-static-properties-via-this-constructor-in-typescript
 function getAutoincrement<T>(target: T) {
   type Type = {
     constructor: Type;
-    table: any;
+    autoincrement: any;
   } & T;
 
-  return (target as Type).constructor.table.autoincrement++;
+  return (target as Type).constructor.autoincrement++;
 }
