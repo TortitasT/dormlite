@@ -34,7 +34,7 @@ class User extends Model {
   }
 }
 
-Deno.test("Create models", async () => {
+Deno.test("Test library", async (test) => {
   await Database.init(
     "test",
     [
@@ -43,15 +43,31 @@ Deno.test("Create models", async () => {
     ],
   );
 
-  const user = new User("John Doe", "john@doe.es");
-  const user2 = new User("John Doe", "john@eod.es");
+  await test.step("Get one model", async () => {
+    await User.clear();
 
-  await User.create(user);
-  await User.create(user2);
+    const user = new User("Getme", "john@doe.es");
 
-  const users = await User.all();
+    await User.create(user);
 
-  assertEquals(users.length, 2);
+    const user2: any = await User.find(1);
+
+    assertEquals(user2[3], "Getme");
+  });
+
+  await test.step("Create models", async () => {
+    await User.clear();
+
+    const user = new User("John Doe", "john@doe.es");
+    const user2 = new User("John Doe", "john@eod.es");
+
+    await User.create(user);
+    await User.create(user2);
+
+    const users = await User.all();
+
+    assertEquals(users.length, 2);
+  });
 
   Database.db.close();
   Deno.removeSync("./test.db", { recursive: true });

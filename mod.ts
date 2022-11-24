@@ -120,6 +120,12 @@ export class Model {
 
     return result[0] as unknown as Model;
   }
+
+  static async clear(): Promise<void> {
+    await Database.db.query(
+      `DELETE FROM ${this.tableName}`,
+    );
+  }
 }
 
 // Source: https://stackoverflow.com/questions/33387318/access-to-static-properties-via-this-constructor-in-typescript
