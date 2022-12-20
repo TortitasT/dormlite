@@ -48,5 +48,5 @@ await User.create(user);
 console.log(await User.all()); // [User { id: 1, name: "John Doe", email: "john@doe.es" }]
 
 Database.db.close();
-Deno.removeSync("test.db");
+Deno.removeSync("test.sqlite");
 ```

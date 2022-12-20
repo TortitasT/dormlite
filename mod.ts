@@ -7,7 +7,7 @@ export class Database {
   static async init(filename: string, models: any[]) {
     const databaseExists = await Deno.stat(`${filename}.db`).catch(() => false);
 
-    this.db = new DB(`${filename}.db`);
+    this.db = new DB(`${filename}.sqlite`);
 
     if (!databaseExists) {
       await models.forEach(async (model) => {

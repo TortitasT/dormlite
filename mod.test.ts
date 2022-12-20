@@ -70,5 +70,5 @@ Deno.test("Test library", async (test) => {
   });
 
   Database.db.close();
-  Deno.removeSync("./test.db", { recursive: true });
+  Deno.removeSync("./test.sqlite", { recursive: true });
 });
